@@ -60,12 +60,10 @@ case_1:
     li t0, 1                   # Load immediate value 1 into t0
     bne a0, t0, case_2         # If a0 != 1, jump to case_2
 
-    # Print message0_1
     li a7, 4                   # syscall number for printing string
     la a0, message0.1          # Load address of message0.1
     ecall                       # Make syscall (print string)
 
-    # Read integer input into a0
     li a7, 5                   # syscall number for reading integer
     ecall                       # Make syscall (input will be stored in a0)
 
@@ -73,12 +71,10 @@ case_1:
 
     addi a1, a0, 0             # Copy value of a0 into a1 using addi
 
-    # Print message0_2
     li a7, 4                   # syscall number for printing string
     la a0, message0.2          # Load address of message0.2
     ecall                       # Make syscall (print message0.2)
 
-    # Read another integer input into a0
     li a7, 5                   # syscall number for reading integer
     ecall                       # Make syscall (input will be stored in a0)
 
@@ -102,7 +98,6 @@ ready:
 
     addi t0, a0, 0              # Store the result of malloc into t0 (copying address)
 
-    # Print message0.3
     li a7, 4                    # Syscall number for printing a string
     la a0, message0.3           # Load address of message0.3
     ecall                       # Make syscall (print string)
@@ -147,7 +142,6 @@ input_end:
 
     la a0, ArrayPtr             # Nạp địa chỉ của ArrayPtr vào a0
     jal getAddress              # Gọi hàm getAddress
-    #mv a0, a0                   # Truyền giá trị trả về của hàm vào a0
     li a7, 1                   # Syscall: in địa chỉ (print address)
     ecall                       # Gọi syscall
 
@@ -301,8 +295,7 @@ sub_case_1:
     mv s1, a0
 
     # Load the array pointer
-    la t0, Array2Ptr
-    lw a0, 0(t0)
+    la a1, Sys_MyFreeSpace
     jal getArray
     mv s2, a0
 
@@ -355,8 +348,8 @@ sub_case_2:
     ecall
 
     # Load the array pointer
-    la t0, Array2Ptr
-    lw a0, 0(t0)
+    la a1, Sys_MyFreeSpace
+    
     jal setArray
     j sub_menu
 
@@ -474,8 +467,8 @@ malloc2:
     sw a1, 4(sp)
     sw a2, 0(sp)
 
-    mul a1, a1, a2           # Multiply the number of elements with size of each element (word size)
-    addi a2, x0, 4           # Word size (4 bytes)
+    mul a1, a1, a2           
+    addi a2, x0, 4          
     jal malloc
 
     lw ra, 8(sp)
@@ -483,27 +476,19 @@ malloc2:
     lw a2, 0(sp)
     addi sp, sp, 12
     jr ra
-# ====================================================
-# getArray: Hàm lấy giá trị phần tử trong mảng 2 chiều
-# ====================================================
-# getArray
+
 getArray:
     mul t0, s0, a2           # i * số cột
     add t0, t0, s1           # Thêm j vào
     slli t0, t0, 2           # Nhân với 4 để có byte offset
-    add t0, t0, a0           # Cộng với địa chỉ đầu mảng
+    add t0, t0, a1           # Cộng với địa chỉ đầu mảng
     lw a0, 0(t0)             # Lấy giá trị phần tử
     jr ra
-             # Trả về
-  
 
-# ====================================================
-# setArray: Hàm thiết lập giá trị phần tử trong mảng 2 chiều
-# ====================================================
 setArray:
-    mul t0, s0, a2           # i * số cột
-    add t0, t0, s1           # Thêm j vào
-    slli t0, t0, 2           # Nhân với 4 để có byte offset
-    add t0, t0, a0           # Cộng với địa chỉ đầu mảng
-    sw a0, 0(t0)             # Ghi giá trị vào địa chỉ tính toán
-    jr ra
+    mul t0, s0, a2           # t0 = i * số cột
+    add t0, t0, s1           # t0 = (i * số cột) + j
+    slli t0, t0, 2           # t0 = (i * số cột + j) * 4 (byte offset)
+    add t0, t0, a1           # t0 = Địa chỉ của phần tử (địa chỉ đầu mảng + offset)
+    sw a0, 0(t0)             # Lưu giá trị vào mảng tại vị trí tính toán
+    jr ra                    # Trở lại
