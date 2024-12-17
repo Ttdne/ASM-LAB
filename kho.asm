@@ -205,159 +205,166 @@ case_2:
     j menu                       # Quay lại menu
 
 case_3:
-    li t1, 3                     # Tải hằng số 3 vào t1
-    bne a0, t1, case_4           # Nếu a0 != 3 thì nhảy đến case_4
+li t1, 3
+bne a0, t1, case_4
 
-    # In message3.1
-    li a7, 4                     # Syscall 4: In chuỗi
-    la a0, message3.1            # Nạp địa chỉ message3.1
-    ecall                        # Thực thi syscall
+# Display message3.1
+li a7, 4
+la a0, message3.1
+ecall
 
-    # Nhập số hàng (rows)
-    li a7, 5                     # Syscall 5: Nhập số nguyên
-    ecall                        # Kết quả lưu vào a0
-    mv a1, a0                    # Lưu số hàng vào a1
+# Read integer input for $a1
+li a7, 5
+ecall
+mv a1, a0
 
-    # In message3.2
-    li a7, 4                     # Syscall 4: In chuỗi
-    la a0, message3.2            # Nạp địa chỉ message3.2
-    ecall                        # Thực thi syscall
+# Display message3.2
+li a7, 4
+la a0, message3.2
+ecall
 
-    # Nhập số cột (columns)
-    li a7, 5                     # Syscall 5: Nhập số nguyên
-    ecall                        # Kết quả lưu vào a0
-    mv a2, a0                    # Lưu số cột vào a2
+# Read integer input for $a2
+li a7, 5
+ecall
+mv a2, a0
 
-    # Cấp phát bộ nhớ cho mảng hai chiều
-    la a0, Array2Ptr             # Nạp địa chỉ con trỏ mảng hai chiều
-    jal malloc2                  # Gọi hàm malloc2 để cấp phát bộ nhớ
-    mv t0, a0                    # Lưu địa chỉ được cấp phát vào t0
+# Call malloc2 to allocate memory
+la a0, Array2Ptr
+jal malloc2
+mv t0, a0
+mv a3, t0
 
-    # In message0.3
-    li a7, 4                     # Syscall 4: In chuỗi
-    la a0, message0.3            # Nạp địa chỉ message0.3
-    ecall                        # Thực thi syscall
+# Display message0.3
+li a7, 4
+la a0, message0.3
+ecall
 
-    mv a0, t0                    # Truyền địa chỉ cấp phát vào a0
-    li t0, 0                     # Đặt t0 = 0 để khởi tạo vòng lặp (hoặc trạng thái ban đầu)
-    mv t1, a1                    # Sao chép số hàng vào t1
-    mul a1, a1, a2               # a1 = a1 * a2 (tổng số phần tử mảng hai chiều)
+# Store the base address of Array2Ptr in $a0
+mv a0, t0
 
-input_loop2: 
-    beq t0, a1, input_end2       # Nếu t0 == a1, thoát khỏi vòng lặp
-    li a7, 5                     # Syscall: nhập số nguyên (RARS syscall code 5)
-    ecall                        # Thực thi syscall
-    sw a0, 0(a2)                 # Lưu giá trị nhập vào địa chỉ của a2
-    addi a2, a2, 4               # Di chuyển con trỏ a2 đến ô tiếp theo (4 byte)
-    addi t0, t0, 1               # Tăng bộ đếm t0 lên 1
-    j input_loop2                # Quay lại vòng lặp
+# Initialize the loop
+mv t0, x0
+mv t1, a1
+mul a1, a1, a2
 
-input_end2: 
-    add a1, zero, t1             # Gán giá trị của t1 vào a1
+# input_loop2
+input_loop2:
+    beq t0, a1, input_end2
+    li a7, 5
+    ecall
+    sw a0, 0(a3)      # Store the value at the current address
+    addi a3, a3, 4    # Move to the next memory location
+    addi t0, t0, 1    # Increment counter
+    j input_loop2
 
-sub_menu: 
-    li a7, 4                     # Syscall: in chuỗi (RARS syscall code 4)
-    la a0, message3.3            # Nạp địa chỉ message3_3 vào a0
-    ecall                        # Thực thi syscall
+input_end2:
+    mv a1, t1          # Restore the value of a1
 
-    la a0, message3.4            # Nạp địa chỉ message3_4 vào a0
-    ecall                        # Thực thi syscall
+# sub_menu
+sub_menu:
+    li a7, 4
+    la a0, message3.3
+    ecall
+    la a0, message3.4
+    ecall
+    la a0, message3.5
+    ecall
+    la a0, select
+    ecall
 
-    la a0, message3.5            # Nạp địa chỉ message3_5 vào a0
-    ecall                        # Thực thi syscall
+    li a7, 5
+    ecall
 
-    la a0, select                # Nạp địa chỉ select vào a0
-    ecall                        # Thực thi syscall
+# sub_case_1
+sub_case_1:
+    li t1, 1
+    bne a0, t1, sub_case_2
 
-    li a7, 5                     # Syscall: nhập số nguyên
-    ecall                        # Thực thi syscall
-sub_case_1: 
-    li t1, 1                        # Tải hằng số 1 vào thanh ghi t1
-    bne a0, t1, sub_case_2          # Nếu a0 != 1 thì nhảy đến sub_case_2
+    # Display message3.01
+    li a7, 4
+    la a0, message3.01
+    ecall
 
-    # In message3.01
-    li a7, 4                       # Syscall: in chuỗi (RARS syscall code 4)
-    la a0, message3.01             # Nạp địa chỉ message3_01
-    ecall                          # Thực thi syscall
+    # Read integer input for $s0
+    li a7, 5
+    ecall
+    mv s0, a0
 
-    # Nhập số nguyên và lưu vào s0
-    li a7, 5                       # Syscall: nhập số nguyên (RARS syscall code 5)
-    ecall                          # Thực thi syscall
-    mv s0, a0                      # Lưu kết quả nhập được vào s0
+    # Display message3.02
+    li a7, 4
+    la a0, message3.02
+    ecall
 
-    # In message3.02
-    li a7, 4                       # Syscall: in chuỗi
-    la a0, message3.02             # Nạp địa chỉ message3_02
-    ecall                          # Thực thi syscall
+    # Read integer input for $s1
+    li a7, 5
+    ecall
+    mv s1, a0
 
-    # Nhập số nguyên và lưu vào s1
-    li a7, 5                       # Syscall: nhập số nguyên
-    ecall                          # Thực thi syscall
-    mv s1, a0                      # Lưu kết quả nhập được vào s1
+    # Load the array pointer
+    la t0, Array2Ptr
+    lw a0, 0(t0)
+    jal getArray
+    mv s2, a0
 
-    # Lấy địa chỉ Array2Ptr và gọi hàm getArray
-    la t0, Array2Ptr               # Nạp địa chỉ Array2Ptr vào t0
-    lw a0, 0(t0)                   # Nạp giá trị tại địa chỉ Array2Ptr vào a0
-    jal getArray                   # Gọi hàm getArray
-    mv s2, a0                      # Lưu kết quả trả về từ getArray vào s2
+    # Display message3.6
+    li a7, 4
+    la a0, message3.6
+    ecall
 
-    # In message3.6
-    li a7, 4                       # Syscall: in chuỗi
-    la a0, message3.6              # Nạp địa chỉ message3_6
-    ecall                          # Thực thi syscall
+    # Print the value in $s2
+    li a7, 1
+    mv a0, s2
+    ecall
+    j sub_menu
 
-    # In giá trị của s2
-    li a7, 1                       # Syscall: in số nguyên (RARS syscall code 1)
-    mv a0, s2                      # Truyền giá trị s2 vào a0
-    ecall                          # Thực thi syscall
-
-    j sub_menu                     # Quay lại sub_menu
+# sub_case_2
 sub_case_2:
-    li t1, 2                        # Tải hằng số 2 vào thanh ghi t1
-    bne a0, t1, sub_case_3          # Nếu a0 != 2 thì nhảy đến sub_case_3
+    li t1, 2
+    bne a0,t1, sub_case_3
 
-    # In message3.01
-    li a7, 4                       # Syscall: in chuỗi (RARS syscall code 4)
-    la a0, message3.01             # Nạp địa chỉ message3.01
-    ecall                          # Thực thi syscall
+    # Display message3.01
+    li a7, 4
+    la a0, message3.01
+    ecall
 
-    # Nhập số nguyên và lưu vào s0
-    li a7, 5                       # Syscall: nhập số nguyên (RARS syscall code 5)
-    ecall                          # Thực thi syscall
-    mv s0, a0                      # Lưu kết quả vào s0
+    # Read integer input for $s0
+    li a7, 5
+    ecall
+    mv s0, a0
 
-    # In message3.02
-    li a7, 4                       # Syscall: in chuỗi
-    la a0, message3.02             # Nạp địa chỉ message3.02
-    ecall                          # Thực thi syscall
+    # Display message3.02
+    li a7, 4
+    la a0, message3.02
+    ecall
 
-    # Nhập số nguyên và lưu vào s1, s2
-    li a7, 5                       # Syscall: nhập số nguyên
-    ecall                          # Thực thi syscall
-    mv s1, a0                      # Lưu vào s1
-    mv s2, a0                      # Lưu vào s2 (cùng giá trị)
+    # Read integer input for $s1
+    li a7, 5
+    ecall
+    mv s1, a0
 
-    # In message0.3
-    li a7, 4                       # Syscall: in chuỗi
-    la a0, message0.3              # Nạp địa chỉ message0.3
-    ecall                          # Thực thi syscall
+    # Move $v0 to $s2
+    mv s2, a0
 
-    # Nhập số nguyên
-    li a7, 5                       # Syscall: nhập số nguyên
-    ecall                          # Thực thi syscall
+    # Display message0.3
+    li a7, 4
+    la a0, message0.3
+    ecall
 
-    # Lấy địa chỉ Array2Ptr và gọi hàm setArray
-    la t0, Array2Ptr               # Nạp địa chỉ Array2Ptr vào t0
-    lw a0, 0(t0)                   # Lấy giá trị tại địa chỉ Array2Ptr vào a0
-    jal setArray                   # Gọi hàm setArray
+    # Read integer input for $v0
+    li a7, 5
+    ecall
 
-    j sub_menu                     # Quay lại sub_menu
+    # Load the array pointer
+    la t0, Array2Ptr
+    lw a0, 0(t0)
+    jal setArray
+    j sub_menu
+
+# sub_case_3
 sub_case_3:
-    li t1, 3                        # Tải giá trị 3 vào t1
-    bne a0, t1, error               # Nếu a0 != 3, nhảy đến error
-
-    j menu                          # Nếu a0 == 3, quay lại menu
-
+li t1, 3
+    bne a0, t1, error
+    j menu
 case_4:
     li t1, 4                        # Tải giá trị 4 vào t1
     bne a0, t1, error               # Nếu a0 != 4, nhảy đến error
@@ -460,36 +467,43 @@ memoryCalculate:
     sub a0, t2, t0                # Tính hiệu giữa hai địa chỉ (t2 - t0), kết quả vào a0
     jr ra                         # Quay lại địa chỉ gọi hàm
 
+# malloc2
 malloc2:
-    addi sp, sp, -12            # Move stack pointer down by 12 bytes to allocate space for 3 values
-    sw ra, 8(sp)                # Save return address into stack (at offset 8)
-    sw a1, 4(sp)                # Save a1 (number of rows) into stack (at offset 4)
-    sw a2, 0(sp)                # Save a2 (number of columns) into stack (at offset 0)
+    addi sp, sp, -12
+    sw ra, 8(sp)
+    sw a1, 4(sp)
+    sw a2, 0(sp)
 
-    mul a1, a1, a2              # a1 = number of rows * number of columns (total elements)
-    addi a2, x0, 4              # a2 = 4 (size of one word in bytes)
+    mul a1, a1, a2           # Multiply the number of elements with size of each element (word size)
+    addi a2, x0, 4           # Word size (4 bytes)
+    jal malloc
 
-    jal malloc                  # Call malloc to allocate memory for the array
-
-    lw ra, 8(sp)                # Restore the return address from stack
-    lw a1, 4(sp)                # Restore the number of rows from stack
-    lw a2, 0(sp)                # Restore the number of columns from stack
-    addi sp, sp, 12             # Restore the stack pointer (back to its original position)
-
-    jr ra                       # Return to the calling function
-
+    lw ra, 8(sp)
+    lw a1, 4(sp)
+    lw a2, 0(sp)
+    addi sp, sp, 12
+    jr ra
+# ====================================================
+# getArray: Hàm lấy giá trị phần tử trong mảng 2 chiều
+# ====================================================
+# getArray
 getArray:
-    mul t0, s0, a2          # t0 = i * number_of_columns
-    add t0, t0, s1          # t0 = t0 + j (i * num_columns + j)
-    slli t0, t0, 2          # t0 = t0 * 4 (Shift left by 2, equivalent to multiplying by 4)
-    add t0, t0, a0          # t0 = base_address + offset (final address of the element)
-    lw a0, 0(t0)            # Load the value into a0 (function return register)
-    jr ra                   # Return to caller
+    mul t0, s0, a2           # i * số cột
+    add t0, t0, s1           # Thêm j vào
+    slli t0, t0, 2           # Nhân với 4 để có byte offset
+    add t0, t0, a0           # Cộng với địa chỉ đầu mảng
+    lw a0, 0(t0)             # Lấy giá trị phần tử
+    jr ra
+             # Trả về
+  
 
+# ====================================================
+# setArray: Hàm thiết lập giá trị phần tử trong mảng 2 chiều
+# ====================================================
 setArray:
-    mul t0, s0, a2          # t0 = i * number_of_columns
-    add t0, t0, s1          # t0 = t0 + j (i * num_columns + j)
-    slli t0, t0, 2          # t0 = t0 * 4 (Shift left by 2, equivalent to multiplying by 4)
-    add t0, t0, a0          # t0 = base_address + offset (final address of the element)
-    sw a1, 0(t0)            # Store the value of a1 into the calculated address
-    jr ra                   # Return to caller
+    mul t0, s0, a2           # i * số cột
+    add t0, t0, s1           # Thêm j vào
+    slli t0, t0, 2           # Nhân với 4 để có byte offset
+    add t0, t0, a0           # Cộng với địa chỉ đầu mảng
+    sw a0, 0(t0)             # Ghi giá trị vào địa chỉ tính toán
+    jr ra
