@@ -1,32 +1,32 @@
 .data 
-CharPtr1: .word 0          # Biến con trỏ kiểu asciiz 
-CharPtr2: .word 0          # Biến con trỏ kiểu asciiz 
-ArrayPtr: .word 0          # Biến con trỏ mảng 1 chiều
-Array2Ptr: .word 0         # Biến con trỏ mảng 2 chiều
-message1: .string "\n\n1. Xu ly mang mot chieu\n"
-message2: .string "2. Sao chep mang ky tu\n"
-message3: .string "3. Xu ly mang hai chieu\n"
-message4: .string "4. Giai phong bo nho\n"
-message0.1: .string "So phan tu: "
-message0.2: .string "So byte moi phan tu (1 hoac 4): "
-message0.3: .string "Nhap phan tu: "
-message1.1: .string "Gia tri cua con tro: "
-message1.2: .string "\nDia chi cua con tro: "
-message1.3: .string "\nTong dia chi da cap phat: "
-message2.1: .string "So ky tu toi da: "
-message2.2: .string "\nNhap chuoi ky tu: "
-message2.3: .string "\nChuoi ky tu duoc copy: "
-message3.1: .string "\nSo hang: "
-message3.2: .string "\nSo cot: "
+CharPtr1: .word 0          
+CharPtr2: .word 0          
+ArrayPtr: .word 0          
+Array2Ptr: .word 0         
+message1: .string "\n\n1. Handling one-dimensional array\n"
+message2: .string "2. String copy\n"
+message3: .string "3. Handling two-dimensional array\n"
+message4: .string "4. Free the memory allocated\n"
+message0.1: .string "Number of Element "
+message0.2: .string "Number of bytes per element (1 or 4) "
+message0.3: .string "Enter the element "
+message1.1: .string "The value of the pointer: "
+message1.2: .string "\nThe address of the pointer: "
+message1.3: .string "\nthe amount of allocated memor: "
+message2.1: .string "Maximum number of characters: "
+message2.2: .string "\nEnter the string of characters: "
+message2.3: .string "\nCharacter series is copied: "
+message3.1: .string "\nRow number: "
+message3.2: .string "\nColumn number: "
 message3.3: .string "\n1. getArray[i][j]\n"
 message3.4: .string "2. setArray[i][j]\n"
-message3.5: .string "3. Thoat\n"
-message3.6: .string "\nGia tri cua phan tu: "
+message3.5: .string "3. Exit\n"
+message3.6: .string "\nThe value of element: "
 message3.01: .string "i = "
 message3.02: .string "j = "
-message4.1: .string "Da giai phong toan bo bo nho cap phat.\n"
-select: .string "Lua chon: "
-errmessage: .string "\nSo vua nhap khong hop le.\n"
+message4.1: .string "Liberated the entire allocation memory.\n"
+select: .string "Select: "
+errmessage: .string "\nThe number just imported is not valid.\n"
 
 
 Sys_TheTopOfFree: .word 1           # Vùng không gian tự do, dùng để cấp bộ nhớ cho các biến con trỏ
@@ -199,165 +199,161 @@ case_2:
     j menu                       # Quay lại menu
 
 case_3:
-li t1, 3
-bne a0, t1, case_4
-
-# Display message3.1
-li a7, 4
-la a0, message3.1
-ecall
-
-# Read integer input for $a1
-li a7, 5
-ecall
-mv a1, a0
-
-# Display message3.2
-li a7, 4
-la a0, message3.2
-ecall
-
-# Read integer input for $a2
-li a7, 5
-ecall
-mv a2, a0
-
-# Call malloc2 to allocate memory
-la a0, Array2Ptr
-jal malloc2
-mv t0, a0
-mv a3, t0
-
-# Display message0.3
-li a7, 4
-la a0, message0.3
-ecall
-
-# Store the base address of Array2Ptr in $a0
-mv a0, t0
-
-# Initialize the loop
-mv t0, x0
-mv t1, a1
-mul a1, a1, a2
-
-# input_loop2
-input_loop2:
-    beq t0, a1, input_end2
-    li a7, 5
-    ecall
-    sw a0, 0(a3)      # Store the value at the current address
-    addi a3, a3, 4    # Move to the next memory location
-    addi t0, t0, 1    # Increment counter
-    j input_loop2
-
-input_end2:
-    mv a1, t1          # Restore the value of a1
-
-# sub_menu
-sub_menu:
-    li a7, 4
-    la a0, message3.3
-    ecall
-    la a0, message3.4
-    ecall
-    la a0, message3.5
-    ecall
-    la a0, select
-    ecall
-
-    li a7, 5
-    ecall
-
-# sub_case_1
-sub_case_1:
-    li t1, 1
-    bne a0, t1, sub_case_2
-
-    # Display message3.01
-    li a7, 4
-    la a0, message3.01
-    ecall
-
-    # Read integer input for $s0
-    li a7, 5
-    ecall
-    mv s0, a0
-
-    # Display message3.02
-    li a7, 4
-    la a0, message3.02
-    ecall
-
-    # Read integer input for $s1
-    li a7, 5
-    ecall
-    mv s1, a0
-
-    # Load the array pointer
-    la a1, Sys_MyFreeSpace
-    jal getArray
-    mv s2, a0
-
-    # Display message3.6
-    li a7, 4
-    la a0, message3.6
-    ecall
-
-    # Print the value in $s2
-    li a7, 1
-    mv a0, s2
-    ecall
-    j sub_menu
-
-# sub_case_2
-sub_case_2:
-    li t1, 2
-    bne a0,t1, sub_case_3
-
-    # Display message3.01
-    li a7, 4
-    la a0, message3.01
-    ecall
-
-    # Read integer input for $s0
-    li a7, 5
-    ecall
-    mv s0, a0
-
-    # Display message3.02
-    li a7, 4
-    la a0, message3.02
-    ecall
-
-    # Read integer input for $s1
-    li a7, 5
-    ecall
-    mv s1, a0
-
-    # Move $v0 to $s2
-    mv s2, a0
-
-    # Display message0.3
-    li a7, 4
-    la a0, message0.3
-    ecall
-
-    # Read integer input for $v0
-    li a7, 5
-    ecall
-
-    # Load the array pointer
-    la a1, Sys_MyFreeSpace
-    
-    jal setArray
-    j sub_menu
-
-# sub_case_3
-sub_case_3:
-li t1, 3
-    bne a0, t1, error
-    j menu
+	li t1, 3
+	bne a0, t1, case_4
+	
+	li a7, 4		#nhap hang	
+	la a0, message3.1
+	ecall
+	
+	li a7, 5
+	ecall
+	mv a1, a0
+	
+	li a7, 4		#nhap cot
+	la a0, message3.2
+	ecall
+	
+	li a7, 5
+	ecall
+	mv a2, a0
+	
+	# Call malloc2 to allocate memory
+	la a0, Array2Ptr
+	jal malloc2
+	mv t0, a0
+	mv a3, t0
+	
+	# Display message0.3
+	li a7, 4
+	la a0, message0.3
+	ecall
+	
+	# Store the base address of Array2Ptr in a0
+	mv a0, t0
+	
+	# Initialize the loop
+	mv t0, x0
+	mv t1, a1
+	mul a1, a1, a2
+	
+	# input_loop2
+	input_loop2:
+	    beq t0, a1, input_end2
+	    li a7, 5
+	    ecall
+	    sw a0, 0(a3)      # Store the value at the current address
+	    addi a3, a3, 4    # Move to the next memory location
+	    addi t0, t0, 1    # Increment counter
+	    j input_loop2
+	
+	input_end2:
+	    mv a1, t1          # Restore the value of a1
+	
+	# sub_menu
+	sub_menu:
+	    li a7, 4
+	    la a0, message3.3
+	    ecall
+	    la a0, message3.4
+	    ecall
+	    la a0, message3.5
+	    ecall
+	    la a0, select
+	    ecall
+	
+	    li a7, 5
+	    ecall
+	
+	# sub_case_1
+	sub_case_1:
+	    li t1, 1
+	    bne a0, t1, sub_case_2
+	
+	    # Display message3.01
+	    li a7, 4
+	    la a0, message3.01
+	    ecall
+	
+	    # Read integer input for $s0
+	    li a7, 5
+	    ecall
+	    mv s0, a0
+	
+	    # Display message3.02
+	    li a7, 4
+	    la a0, message3.02
+	    ecall
+	
+	    # Read integer input for $s1
+	    li a7, 5
+	    ecall
+	    mv s1, a0
+	
+	    # Load the array pointer
+	    la a1, Sys_MyFreeSpace
+	    jal getArray
+	    mv s2, a0
+	
+	    # Display message3.6
+	    li a7, 4
+	    la a0, message3.6
+	    ecall
+	
+	    # Print the value in $s2
+	    li a7, 1
+	    mv a0, s2
+	    ecall
+	    j sub_menu
+	
+	# sub_case_2
+	sub_case_2:
+	    li t1, 2
+	    bne a0,t1, sub_case_3
+	
+	    # Display message3.01
+	    li a7, 4
+	    la a0, message3.01
+	    ecall
+	
+	    # Read integer input for $s0
+	    li a7, 5
+	    ecall
+	    mv s0, a0
+	
+	    # Display message3.02
+	    li a7, 4
+	    la a0, message3.02
+	    ecall
+	
+	    # Read integer input for $s1
+	    li a7, 5
+	    ecall
+	    mv s1, a0
+	
+	    # Move $v0 to $s2
+	    mv s2, a0
+	
+	    # Display message0.3
+	    li a7, 4
+	    la a0, message0.3
+	    ecall
+	
+	    # Read integer input for $v0
+	    li a7, 5
+	    ecall
+	
+	    # Load the array pointer
+	    la a1, Sys_MyFreeSpace
+	    
+	    jal setArray
+	    j sub_menu
+	
+	# sub_case_3
+	sub_case_3:
+	li t1, 3
+	    bne a0, t1, error
+	    j menu
 case_4:
     li t1, 4                        # Tải giá trị 4 vào t1
     bne a0, t1, error               # Nếu a0 != 4, nhảy đến error
